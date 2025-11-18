@@ -1,5 +1,5 @@
 {
-  "name": "zenn-article",
+  "name": "sync-docs-to-wiki",
   "version": "0.1.0",
   "private": true,
   "scripts": {
