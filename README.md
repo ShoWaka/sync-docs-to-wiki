@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# sync-docs-to-wiki
 
-## Getting Started
+GitHub Wiki への自動同期を行うためのサンプルリポジトリです。
 
-First, run the development server:
+このリポジトリは、`docs/wiki/` ディレクトリ配下の Markdown ファイルを GitHub Wiki に自動的に同期する GitHub Actions ワークフローのサンプルとして提供されています。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 概要
+
+`docs/wiki/` ディレクトリ内の Markdown ファイルを GitHub Wiki に自動同期します。以下の機能を提供します：
+
+- 📄 `docs/wiki/` 配下の Markdown ファイルを Wiki ページとして自動作成・更新
+- 🗑️ `docs/wiki/` から削除されたファイルに対応する Wiki ページを自動削除
+- 📋 Wiki のサイドバー（`_Sidebar`）を自動生成
+- 🔒 保護された Wiki ページ（`[private]` で始まるページなど）は削除対象外
+
+## 構成
+
+```
+.
+├── .github/
+│   └── workflows/
+│       └── sync-wiki.yml          # GitHub Actions ワークフロー定義
+├── docs/
+│   └── wiki/                       # Wiki に同期する Markdown ファイル
+│       ├── Home.md
+│       ├── 01_要件定義書/
+│       │   ├── 開発要件.md
+│       │   └── 顧客要件.md
+│       └── 02_権限設計書/
+│           ├── 一般ユーザー.md
+│           └── 管理者ユーザー.md
+└── scripts/
+    └── sync-docs-to-wiki.js        # Wiki 同期スクリプト
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 使い方
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. リポジトリのセットアップ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. `sync-wiki.yml`と`sync-docs-to-wiki.js`を任意のリポジトリに移植します。
+2. GitHub リポジトリで Wiki 機能を有効化します（Settings → Features → Wiki を有効化）
 
-## Learn More
+### 2. ワークフローの動作
 
-To learn more about Next.js, take a look at the following resources:
+以下の条件で自動的に Wiki 同期が実行されます：
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `main` または `develop` ブランチにプッシュされたとき
+- `docs/wiki/**/*.md` ファイルが変更されたとき
+- GitHub Actions の手動実行（`workflow_dispatch`）
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Wiki ページの追加・更新
 
-## Deploy on Vercel
+`docs/wiki/` ディレクトリに Markdown ファイルを追加または更新すると、自動的に GitHub Wiki に反映されます。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+ファイルパスは Wiki ページタイトルに変換されます：
+- `docs/wiki/01_要件定義書/開発要件.md` → Wiki ページタイトル: `01_要件定義書-開発要件`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 4. Wiki ページの削除
+
+`docs/wiki/` からファイルを削除すると、対応する Wiki ページも自動的に削除されます。
+
+ただし、以下のページは削除されません：
+- `[private]` で始まるページ
+- `PROTECTED_WIKI_PAGES` に指定されたページ
+
+## カスタマイズ
+
+### 同期対象ディレクトリの変更
+
+`scripts/sync-docs-to-wiki.js` の `DOCS_DIR` を変更することで、同期対象のディレクトリを変更できます：
+
+```javascript
+const DOCS_DIR = path.join(process.cwd(), 'docs', 'wiki');
+```
+
+### 保護ページの設定
+
+`scripts/sync-docs-to-wiki.js` の `PROTECTED_WIKI_PAGES` に保護したいページタイトルを追加できます：
+
+```javascript
+const PROTECTED_WIKI_PAGES = [
+  '保護したいページ名',
+];
+```
+
+### ワークフローのトリガー条件の変更
+
+`.github/workflows/sync-wiki.yml` の `on` セクションを編集することで、実行条件を変更できます。
+
+## 注意事項
+
+- このスクリプトは GitHub Actions 環境でのみ実行可能です（ローカル実行は不可）
+- Wiki 機能が有効になっている必要があります
+- `GITHUB_TOKEN` は自動的に提供されるため、追加の設定は不要です
+
+## ライセンス
+
+このサンプルコードは自由に使用・改変できます。
