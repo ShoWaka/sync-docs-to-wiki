@@ -82,9 +82,9 @@ function getWikiTitle(relativePath) {
   // ファイル名から拡張子を除去
   const nameWithoutExt = relativePath.replace(/\.md$/, '');
 
-  // パス区切りをスペースに変換（必要に応じて調整）
+  // パス区切りをハイフンに変換（必要に応じて調整）
   // 例: "01_要件定義書" -> "01_要件定義書"
-  // 例: "akfm-knowledge/part_1" -> "akfm-knowledge-part_1"
+  // 例: "01_要件定義書/顧客要件" -> "01_要件定義書-顧客要件"
   return nameWithoutExt.replace(/\//g, '-');
 }
 
